@@ -8,9 +8,11 @@ if (btnFormAddCita) {
 }
 
 const formAddCita = document.getElementById("form_add_cita");
+const btnAddCita = document.getElementById("btn_add_cita");
 if (formAddCita) {
    formAddCita.addEventListener("submit", (e) => {
       e.preventDefault();
+      btnAddCita.setAttribute("disabled", "disabled");
       const cedRepresentante = document.getElementById("ced_representante"),
          telfRepresentante = document.getElementById("telf_representante"),
          nomRepresentante = document.getElementById("nom_representante"),
@@ -22,27 +24,104 @@ if (formAddCita) {
          desNinio = document.getElementById("des_ninio");
 
       const newCita = {
-         ced_representante: cedRepresentante.value,
-         tel_representante: telfRepresentante.value,
+         ced_representante: parseInt(cedRepresentante.value),
+         tel_representante: parseInt(telfRepresentante.value),
          nom_representante: nomRepresentante.value,
          ape_representante: apeRepresentante.value,
-         ced_paciente: cedNinio.value,
+         ced_paciente: parseInt(cedNinio.value),
          nom_paciente: nomNinio.value,
          ape_paciente: apeNinio.value,
-         edad_paciente: edadNinio.value,
+         edad_paciente: parseInt(edadNinio.value),
          des_paciente: desNinio.value,
       };
+      createCitaFetch(newCita);
    });
 }
 
-/* let temaplateHtmlTable = ` 
-<tr>
-   <th scope="row" class="py-3">1</th>
-   <td class="py-3">Mark</td>
-   <td class="py-3">Otto</td>
-   <td class="py-3">@mdo</td>
-   <th scope="col" class="py-2">
-      <button class="btn btn-sm btn-info">Ver descripcion</button>
-   </th>
-</tr>
-`; */
+async function indexCitaFetch() {
+   const data = await fetch(`http://localhost:5500/citas`);
+   const result = await data.json();
+   dataRender(result);
+}
+
+async function createCitaFetch(cita) {
+   const result = await fetch(`http://localhost:5500/citas`, {
+      method: "POST",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      body: JSON.stringify(cita),
+   });
+   const data = await result.json();
+   ipcRenderer.send("cita:agg", "");
+}
+
+async function showCita(id) {
+   const data = await fetch(`http://localhost:5500/cita/${id}`);
+   const result = await data.json();
+   ipcRenderer.send("show:cita", result);
+}
+
+async function destroyCita(id) {
+   const data = await fetch(`http://localhost:5500/cita/${id}`, {
+      method: "DELETE",
+   });
+   const result = await data.json();
+   ipcRenderer.send("destroy:cita", "");
+}
+
+function dataRender(data) {
+   const tbody = document.getElementById("data");
+   if (tbody) {
+      let templateHtmlTable = "";
+      data.forEach((cita) => {
+         templateHtmlTable += ` 
+      <tr>
+         <th scope="row" class="py-3">${cita.id_cita}</th>
+         <td class="py-3">${cita.nom_paciente}</td>
+         <td class="py-3">${cita.ape_paciente}</td>
+         <td class="py-3">${cita.edad_paciente}</td>
+         <th scope="col" class="py-2">
+            <button class="btn btn-sm btn-info" onclick="showCita(${cita.id_cita})">Ver descripcion</button>
+         </th>
+      </tr>
+      `;
+      });
+      tbody.innerHTML = templateHtmlTable;
+   }
+}
+ipcRenderer.on("show:cita:data", (e, data) => {
+   const containerButtons = document.querySelector(".con-buttons-actions");
+   const nikPacinete = document.getElementById("nik_paciente");
+   const nombrePacinete = document.getElementById("nom_paciente");
+   const apellidoPacinete = document.getElementById("ape_paciente");
+   const edadPacinete = document.getElementById("edad_paciente");
+   const cedulaPacinete = document.getElementById("ced_paciente");
+   const descripcionPacinete = document.getElementById("des_paciente");
+   const nombreRepresentante = document.getElementById("nom_representante");
+   const apellidoRepresentante = document.getElementById("ape_representante");
+   const telefonoRepresentante = document.getElementById("tel_representante");
+   const cedulaRepresentante = document.getElementById("ced_representante");
+   nikPacinete.textContent = `${data.nom_paciente} ${data.ape_paciente}`;
+   nombrePacinete.textContent = `${data.nom_paciente}`;
+   apellidoPacinete.textContent = `${data.ape_paciente}`;
+   edadPacinete.textContent = `${data.edad_paciente}`;
+   cedulaPacinete.textContent = `${data.ced_paciente}`;
+   descripcionPacinete.textContent = `${data.des_paciente}`;
+   nombreRepresentante.textContent = `${data.nom_representante}`;
+   apellidoRepresentante.textContent = `${data.ape_representante}`;
+   telefonoRepresentante.textContent = `${data.tel_representante}`;
+   cedulaRepresentante.textContent = `${data.ced_representante}`;
+   containerButtons.setAttribute("data-id", `${data.id_cita}`);
+});
+
+const btnDestroyCita = document.querySelector(".btn-destroy");
+if (btnDestroyCita) {
+   btnDestroyCita.addEventListener("click", (e) => {
+      const parent = btnDestroyCita.parentElement;
+      const id = parent.dataset.id;
+      destroyCita(id);
+   });
+}
+
+indexCitaFetch();

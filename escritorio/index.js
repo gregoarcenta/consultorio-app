@@ -5,6 +5,7 @@ const { createMenu } = require("./src/helpers/menu");
 
 let mainWindow;
 let addCitaWindow;
+let citaWindow;
 
 /**Ventana principal */
 function createMainWindow() {
@@ -19,11 +20,20 @@ function createMainWindow() {
    mainWindow.loadFile("./src/views/index.html");
 
    //createMenu(createAddCitaWindow);
+   ipcMain.on("cita:agg", () => {
+      mainWindow.reload();
+      addCitaWindow.close();
+   });
+   ipcMain.on("destroy:cita", () => {
+      mainWindow.reload();
+      citaWindow.close();
+   });
 
    mainWindow.on("closed", () => {
       app.quit();
    });
 }
+
 /**Ventana de agregar */
 function createAddCitaWindow() {
    addCitaWindow = new BrowserWindow({
@@ -35,15 +45,12 @@ function createAddCitaWindow() {
          nodeIntegration: true,
       },
    });
-   addCitaWindow.setMenu(null);
-
+   //addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
-
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
    });
 }
-
 ipcMain.on("form:cita", () => {
    addCitaWindow = new BrowserWindow({
       parent: mainWindow,
@@ -55,11 +62,30 @@ ipcMain.on("form:cita", () => {
       },
    });
    //addCitaWindow.setMenu(null);
-
    addCitaWindow.loadFile("./src/views/add-cita.html");
-
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
+   });
+});
+
+/**Ventana que muestra una cita */
+ipcMain.on("show:cita", (e, data) => {
+   citaWindow = new BrowserWindow({
+      parent: mainWindow,
+      modal: true,
+      width: 800,
+      height: 600,
+      webPreferences: {
+         nodeIntegration: true,
+      },
+   });
+   //addCitaWindow.setMenu(null);
+   citaWindow.loadFile("./src/views/cita.html");
+   citaWindow.on("closed", () => {
+      citaWindow = null;
+   });
+   citaWindow.webContents.on("did-finish-load", () => {
+      citaWindow.webContents.send("show:cita:data", data[0]);
    });
 });
 
