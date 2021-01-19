@@ -22,6 +22,22 @@ app.get("/citas", async (req, res) => {
    }
 });
 
+/** Mostrar una cita  con la cedula*/
+app.get("/cita", async (req, res) => {
+   const cedula = parseInt(req.query.cedula);
+   try {
+      const conn = await getConnection();
+      const result = await conn.query(
+         "SELECT * FROM citas WHERE ced_paciente = ?",
+         cedula
+      );
+      console.log(result);
+      res.json(result);
+   } catch (error) {
+      console.log(error);
+   }
+});
+
 /**Agrega una nueva cita*/
 app.post("/citas", async (req, res) => {
    try {

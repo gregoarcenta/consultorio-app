@@ -43,6 +43,13 @@ async function indexCitaFetch() {
    const result = await data.json();
    dataRender(result);
 }
+async function showCitaCedula(cedula) {
+   console.log(cedula);
+   const data = await fetch(`http://localhost:5500/cita?cedula=${cedula}`);
+   const result = await data.json();
+   console.log(result);
+   dataRender(result);
+}
 
 async function createCitaFetch(cita) {
    const result = await fetch(`http://localhost:5500/citas`, {
@@ -90,6 +97,16 @@ function dataRender(data) {
       tbody.innerHTML = templateHtmlTable;
    }
 }
+
+const search = document.getElementById("search_cita"),
+   buttonSearch = document.getElementById("search-addon");
+if (buttonSearch) {
+   buttonSearch.addEventListener("click", () => {
+      const value = search.value;
+      showCitaCedula(value);
+   });
+}
+
 ipcRenderer.on("show:cita:data", (e, data) => {
    const containerButtons = document.querySelector(".con-buttons-actions");
    const nikPacinete = document.getElementById("nik_paciente");
