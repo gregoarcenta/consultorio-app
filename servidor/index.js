@@ -8,7 +8,7 @@ const port = 5500;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-//require("./database");
+require("./database");
 
 /**Retorna todas las citas */
 app.get("/citas", async (req, res) => {
@@ -38,18 +38,6 @@ app.get("/cita", async (req, res) => {
    }
 });
 
-/**Agrega una nueva cita*/
-app.post("/citas", async (req, res) => {
-   try {
-      const conn = await getConnection();
-      const result = await conn.query("INSERT INTO citas SET ?", req.body);
-      console.log(result);
-      res.json(result);
-   } catch (error) {
-      console.log(error);
-   }
-});
-
 /** Mostrar una cita */
 app.get("/cita/:id", async (req, res) => {
    try {
@@ -64,9 +52,32 @@ app.get("/cita/:id", async (req, res) => {
       console.log(error);
    }
 });
+/**Agrega una nueva cita*/
+app.post("/citas", async (req, res) => {
+   try {
+      const conn = await getConnection();
+      const result = await conn.query("INSERT INTO citas SET ?", req.body);
+      console.log(result);
+      res.json(result);
+   } catch (error) {
+      console.log(error);
+   }
+});
 
 /** Acualiza una cita */
-app.post("/cita", (req, res) => {});
+app.put("/cita/:id", async (req, res) => {
+   try {
+      const conn = await getConnection();
+      const result = await conn.query("UPDATE citas SET ? WHERE id_cita = ?", [
+         req.body,
+         req.params.id,
+      ]);
+      console.log(result);
+      res.json(result);
+   } catch (error) {
+      console.log(error);
+   }
+});
 
 /**Elimina una cita */
 app.delete("/cita/:id", async (req, res) => {

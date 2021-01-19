@@ -1,5 +1,16 @@
 const { ipcRenderer } = require("electron");
 
+let cedRepresentante = document.getElementById("ced_representante"),
+   telfRepresentante = document.getElementById("telf_representante"),
+   nomRepresentante = document.getElementById("nom_representante"),
+   apeRepresentante = document.getElementById("ape_representante"),
+   cedNinio = document.getElementById("ced_ninio"),
+   nomNinio = document.getElementById("nom_ninio"),
+   apeNinio = document.getElementById("ape_ninio"),
+   edadNinio = document.getElementById("edad_ninio"),
+   desNinio = document.getElementById("des_ninio"),
+   id = document.getElementById("id");
+
 const btnFormAddCita = document.getElementById("btn_form_add_cita");
 if (btnFormAddCita) {
    btnFormAddCita.addEventListener("click", (e) => {
@@ -13,15 +24,6 @@ if (formAddCita) {
    formAddCita.addEventListener("submit", (e) => {
       e.preventDefault();
       btnAddCita.setAttribute("disabled", "disabled");
-      const cedRepresentante = document.getElementById("ced_representante"),
-         telfRepresentante = document.getElementById("telf_representante"),
-         nomRepresentante = document.getElementById("nom_representante"),
-         apeRepresentante = document.getElementById("ape_representante"),
-         cedNinio = document.getElementById("ced_ninio"),
-         nomNinio = document.getElementById("nom_ninio"),
-         apeNinio = document.getElementById("ape_ninio"),
-         edadNinio = document.getElementById("edad_ninio"),
-         desNinio = document.getElementById("des_ninio");
 
       const newCita = {
          ced_representante: parseInt(cedRepresentante.value),
@@ -34,7 +36,11 @@ if (formAddCita) {
          edad_paciente: parseInt(edadNinio.value),
          des_paciente: desNinio.value,
       };
-      createCitaFetch(newCita);
+      if (id.value !== "") {
+         updateCita(parseInt(id.value), newCita);
+      } else {
+         createCitaFetch(newCita);
+      }
    });
 }
 
@@ -43,11 +49,10 @@ async function indexCitaFetch() {
    const result = await data.json();
    dataRender(result);
 }
+
 async function showCitaCedula(cedula) {
-   console.log(cedula);
    const data = await fetch(`http://localhost:5500/cita?cedula=${cedula}`);
    const result = await data.json();
-   console.log(result);
    dataRender(result);
 }
 
@@ -60,13 +65,25 @@ async function createCitaFetch(cita) {
       body: JSON.stringify(cita),
    });
    const data = await result.json();
-   ipcRenderer.send("cita:agg", "");
+   ipcRenderer.send("create:cita", "");
 }
 
 async function showCita(id) {
    const data = await fetch(`http://localhost:5500/cita/${id}`);
    const result = await data.json();
    ipcRenderer.send("show:cita", result);
+}
+
+async function updateCita(id, cita) {
+   const result = await fetch(`http://localhost:5500/cita/${id}`, {
+      method: "PUT",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      body: JSON.stringify(cita),
+   });
+   const data = await result.json();
+   ipcRenderer.send("update:cita", "");
 }
 
 async function destroyCita(id) {
@@ -132,12 +149,39 @@ ipcRenderer.on("show:cita:data", (e, data) => {
    containerButtons.setAttribute("data-id", `${data.id_cita}`);
 });
 
+ipcRenderer.on("edit:cita:data", (e, data) => {
+   id.value = data.id_cita;
+   cedRepresentante.value = data.ced_representante;
+   telfRepresentante.value = data.tel_representante;
+   nomRepresentante.value = data.nom_representante;
+   apeRepresentante.value = data.ape_representante;
+   cedNinio.value = data.ced_paciente;
+   nomNinio.value = data.nom_paciente;
+   apeNinio.value = data.ape_paciente;
+   edadNinio.value = data.edad_paciente;
+   desNinio.value = data.des_paciente;
+});
+
 const btnDestroyCita = document.querySelector(".btn-destroy");
 if (btnDestroyCita) {
    btnDestroyCita.addEventListener("click", (e) => {
       const parent = btnDestroyCita.parentElement;
       const id = parent.dataset.id;
-      destroyCita(id);
+      const response = confirm("¿Estas seguro de eliminar esta cita?");
+      if (response) {
+         destroyCita(id);
+      }
+   });
+}
+
+const btnEditCita = document.querySelector(".btn-edit");
+if (btnEditCita) {
+   btnEditCita.addEventListener("click", async (e) => {
+      const parent = btnDestroyCita.parentElement;
+      const id = parent.dataset.id;
+      const data = await fetch(`http://localhost:5500/cita/${id}`);
+      const cita = await data.json();
+      ipcRenderer.send("form:cita:edit", cita);
    });
 }
 

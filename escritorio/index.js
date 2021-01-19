@@ -1,8 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const { createMenu } = require("./src/helpers/menu");
 
-//require("./database");
-
 let mainWindow;
 let addCitaWindow;
 let citaWindow;
@@ -16,11 +14,9 @@ function createMainWindow() {
          nodeIntegration: true,
       },
    });
-
    mainWindow.loadFile("./src/views/index.html");
-
    //createMenu(createAddCitaWindow);
-   ipcMain.on("cita:agg", () => {
+   ipcMain.on("create:cita", () => {
       mainWindow.reload();
       addCitaWindow.close();
    });
@@ -28,7 +24,11 @@ function createMainWindow() {
       mainWindow.reload();
       citaWindow.close();
    });
-
+   ipcMain.on("update:cita", () => {
+      mainWindow.reload();
+      addCitaWindow.close();
+      citaWindow.close();
+   });
    mainWindow.on("closed", () => {
       app.quit();
    });
@@ -45,7 +45,7 @@ function createAddCitaWindow() {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -61,10 +61,30 @@ ipcMain.on("form:cita", () => {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
+   });
+});
+
+ipcMain.on("form:cita:edit", (e, cita) => {
+   addCitaWindow = new BrowserWindow({
+      parent: citaWindow,
+      modal: true,
+      width: 800,
+      height: 615,
+      webPreferences: {
+         nodeIntegration: true,
+      },
+   });
+   addCitaWindow.setMenu(null);
+   addCitaWindow.loadFile("./src/views/add-cita.html");
+   addCitaWindow.on("closed", () => {
+      addCitaWindow = null;
+   });
+   addCitaWindow.webContents.on("did-finish-load", () => {
+      addCitaWindow.webContents.send("edit:cita:data", cita[0]);
    });
 });
 
@@ -79,7 +99,7 @@ ipcMain.on("show:cita", (e, data) => {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    citaWindow.loadFile("./src/views/cita.html");
    citaWindow.on("closed", () => {
       citaWindow = null;
