@@ -1,15 +1,28 @@
 const { ipcRenderer } = require("electron");
 
 let cedRepresentante = document.getElementById("ced_representante"),
-   telfRepresentante = document.getElementById("telf_representante"),
+   telfRepresentante = document.getElementById("tel_representante"),
    nomRepresentante = document.getElementById("nom_representante"),
    apeRepresentante = document.getElementById("ape_representante"),
-   cedNinio = document.getElementById("ced_ninio"),
-   nomNinio = document.getElementById("nom_ninio"),
-   apeNinio = document.getElementById("ape_ninio"),
-   edadNinio = document.getElementById("edad_ninio"),
-   desNinio = document.getElementById("des_ninio"),
-   id = document.getElementById("id");
+   cedNinio = document.getElementById("ced_paciente"),
+   nomNinio = document.getElementById("nom_paciente"),
+   apeNinio = document.getElementById("ape_paciente"),
+   edadNinio = document.getElementById("edad_paciente"),
+   desNinio = document.getElementById("des_paciente"),
+   id = document.getElementById("id"),
+   msgError = document.querySelector(".alert-danger");
+
+let newCita = {
+   ced_representante: false,
+   tel_representante: false,
+   nom_representante: false,
+   ape_representante: false,
+   ced_paciente: false,
+   nom_paciente: false,
+   ape_paciente: false,
+   edad_paciente: false,
+   des_paciente: false,
+};
 
 const btnFormAddCita = document.getElementById("btn_form_add_cita");
 if (btnFormAddCita) {
@@ -21,25 +34,30 @@ if (btnFormAddCita) {
 const formAddCita = document.getElementById("form_add_cita");
 const btnAddCita = document.getElementById("btn_add_cita");
 if (formAddCita) {
+   validForm();
    formAddCita.addEventListener("submit", (e) => {
       e.preventDefault();
       btnAddCita.setAttribute("disabled", "disabled");
-
-      const newCita = {
-         ced_representante: parseInt(cedRepresentante.value),
-         tel_representante: parseInt(telfRepresentante.value),
-         nom_representante: nomRepresentante.value,
-         ape_representante: apeRepresentante.value,
-         ced_paciente: parseInt(cedNinio.value),
-         nom_paciente: nomNinio.value,
-         ape_paciente: apeNinio.value,
-         edad_paciente: parseInt(edadNinio.value),
-         des_paciente: desNinio.value,
-      };
-      if (id.value !== "") {
-         updateCita(parseInt(id.value), newCita);
+      if (isValidForm()) {
+         newCita = {
+            ced_representante: parseInt(cedRepresentante.value),
+            tel_representante: parseInt(telfRepresentante.value),
+            nom_representante: nomRepresentante.value,
+            ape_representante: apeRepresentante.value,
+            ced_paciente: parseInt(cedNinio.value),
+            nom_paciente: nomNinio.value,
+            ape_paciente: apeNinio.value,
+            edad_paciente: parseInt(edadNinio.value),
+            des_paciente: desNinio.value,
+         };
+         if (id.value !== "") {
+            updateCita(parseInt(id.value), newCita);
+         } else {
+            createCitaFetch(newCita);
+         }
       } else {
-         createCitaFetch(newCita);
+         btnAddCita.removeAttribute("disabled");
+         msgError.classList.remove("d-none");
       }
    });
 }
@@ -125,17 +143,17 @@ if (buttonSearch) {
 }
 
 ipcRenderer.on("show:cita:data", (e, data) => {
-   const containerButtons = document.querySelector(".con-buttons-actions");
-   const nikPacinete = document.getElementById("nik_paciente");
-   const nombrePacinete = document.getElementById("nom_paciente");
-   const apellidoPacinete = document.getElementById("ape_paciente");
-   const edadPacinete = document.getElementById("edad_paciente");
-   const cedulaPacinete = document.getElementById("ced_paciente");
-   const descripcionPacinete = document.getElementById("des_paciente");
-   const nombreRepresentante = document.getElementById("nom_representante");
-   const apellidoRepresentante = document.getElementById("ape_representante");
-   const telefonoRepresentante = document.getElementById("tel_representante");
-   const cedulaRepresentante = document.getElementById("ced_representante");
+   const containerButtons = document.querySelector(".con-buttons-actions"),
+      nikPacinete = document.getElementById("nik_paciente"),
+      nombrePacinete = document.getElementById("nom_paciente"),
+      apellidoPacinete = document.getElementById("ape_paciente"),
+      edadPacinete = document.getElementById("edad_paciente"),
+      cedulaPacinete = document.getElementById("ced_paciente"),
+      descripcionPacinete = document.getElementById("des_paciente"),
+      nombreRepresentante = document.getElementById("nom_representante"),
+      apellidoRepresentante = document.getElementById("ape_representante"),
+      telefonoRepresentante = document.getElementById("tel_representante"),
+      cedulaRepresentante = document.getElementById("ced_representante");
    nikPacinete.textContent = `${data.nom_paciente} ${data.ape_paciente}`;
    nombrePacinete.textContent = `${data.nom_paciente}`;
    apellidoPacinete.textContent = `${data.ape_paciente}`;
@@ -186,3 +204,106 @@ if (btnEditCita) {
 }
 
 indexCitaFetch();
+
+/**
+ *
+ * Script para validar el formulario
+ *
+ */
+
+function validForm() {
+   document.addEventListener("keyup", (e) => {
+      const $input = e.target;
+      if (e.target.matches(".form-control")) {
+         switch ($input.id) {
+            case "ced_representante":
+               validsChangeInput($input, /^\d{10}$/);
+               break;
+            case "tel_representante":
+               validsChangeInput($input, /^\d{7,10}$/);
+               break;
+            case "nom_representante":
+               validsChangeInput($input, /^[a-zA-ZÁ-ÿ\s]{1,40}$/);
+               break;
+            case "ape_representante":
+               validsChangeInput($input, /^[a-zA-ZÁ-ÿ\s]{1,40}$/);
+               break;
+            case "ced_paciente":
+               validsChangeInput($input, /^\d{10}$/);
+               break;
+            case "nom_paciente":
+               validsChangeInput($input, /^[a-zA-ZÁ-ÿ\s]{1,40}$/);
+               break;
+            case "ape_paciente":
+               validsChangeInput($input, /^[a-zA-ZÁ-ÿ\s]{1,40}$/);
+               break;
+            case "edad_paciente":
+               validsChangeInput($input, /^\d{1,2}$/);
+               break;
+            case "des_paciente":
+               validsChangeInputDes($input, /^[a-zA-ZÁ-ÿ1-9\s]{1,100}$/);
+               break;
+
+            default:
+               break;
+         }
+      }
+   });
+}
+function validsChangeInput(input, regExp) {
+   const validation = RegExp(regExp);
+   if (validation.test(input.value)) {
+      inputSuccess(input);
+   } else {
+      inputError(input);
+   }
+}
+function validsChangeInputDes(input, regExp) {
+   const $errorInput = input.parentElement.nextElementSibling;
+   const validation = RegExp(regExp);
+   if (validation.test(input.value)) {
+      $errorInput.classList.add("d-none");
+      newCita[input.id] = true;
+   } else {
+      $errorInput.classList.remove("d-none");
+      newCita[input.id] = false;
+   }
+}
+const inputError = (input) => {
+   const $errorInput = input.parentElement.nextElementSibling;
+   const $checkIcon = input.nextElementSibling.nextElementSibling;
+   const $errorIcon = input.nextElementSibling;
+
+   $errorInput.classList.remove("d-none");
+   $checkIcon.classList.remove("check-circle");
+   $errorIcon.classList.add("times-circle-error");
+   //input.classList.add("form-input-invalid");
+
+   newCita[input.id] = false;
+};
+
+const inputSuccess = (input) => {
+   const $errorInput = input.parentElement.nextElementSibling;
+   const $checkIcon = input.nextElementSibling.nextElementSibling;
+   const $errorIcon = input.nextElementSibling;
+
+   //input.classList.remove("form-input-invalid");
+   $errorIcon.classList.remove("times-circle-error");
+   $errorInput.classList.add("d-none");
+   $checkIcon.classList.add("check-circle");
+
+   newCita[input.id] = true;
+};
+function isValidForm() {
+   return (
+      newCita.ced_representante &&
+      newCita.tel_representante &&
+      newCita.nom_representante &&
+      newCita.ape_representante &&
+      newCita.ced_paciente &&
+      newCita.nom_paciente &&
+      newCita.ape_paciente &&
+      newCita.edad_paciente &&
+      newCita.des_paciente
+   );
+}

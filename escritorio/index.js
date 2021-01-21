@@ -45,7 +45,7 @@ function createAddCitaWindow() {
          nodeIntegration: true,
       },
    });
-   addCitaWindow.setMenu(null);
+   //addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -61,7 +61,7 @@ ipcMain.on("form:cita", () => {
          nodeIntegration: true,
       },
    });
-   addCitaWindow.setMenu(null);
+   //addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -99,7 +99,7 @@ ipcMain.on("show:cita", (e, data) => {
          nodeIntegration: true,
       },
    });
-   addCitaWindow.setMenu(null);
+   //citaWindow.setMenu(null);
    citaWindow.loadFile("./src/views/cita.html");
    citaWindow.on("closed", () => {
       citaWindow = null;
