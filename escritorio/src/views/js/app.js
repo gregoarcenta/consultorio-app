@@ -212,8 +212,20 @@ indexCitaFetch();
  */
 
 function validForm() {
+   let bandera = 1;
    document.addEventListener("keyup", (e) => {
       const $input = e.target;
+      if (bandera === 1) {
+         const arr = Array.from(document.querySelectorAll(".form-control"));
+         for (const e of arr) {
+            if (e.value !== "") {
+               newCita[e.id] = true;
+            }
+            if (e.id === $input.id) continue;
+            console.log(e);
+         }
+         bandera = 2;
+      }
       if (e.target.matches(".form-control")) {
          switch ($input.id) {
             case "ced_representante":

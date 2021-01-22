@@ -78,7 +78,7 @@ ipcMain.on("form:cita:edit", (e, cita) => {
          nodeIntegration: true,
       },
    });
-   addCitaWindow.setMenu(null);
+   //addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
