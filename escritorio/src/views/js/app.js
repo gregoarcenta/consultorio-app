@@ -142,6 +142,13 @@ if (buttonSearch) {
    });
 }
 
+const reload = document.querySelector(".reload");
+if (reload) {
+   reload.addEventListener("click", () => {
+      ipcRenderer.send("reload:window", "");
+   });
+}
+
 ipcRenderer.on("show:cita:data", (e, data) => {
    const containerButtons = document.querySelector(".con-buttons-actions"),
       nikPacinete = document.getElementById("nik_paciente"),

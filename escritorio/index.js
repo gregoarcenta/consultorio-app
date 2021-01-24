@@ -15,7 +15,7 @@ function createMainWindow() {
       },
    });
    mainWindow.loadFile("./src/views/index.html");
-   //createMenu(createAddCitaWindow);
+   createMenu(createAddCitaWindow);
    ipcMain.on("create:cita", () => {
       mainWindow.reload();
       addCitaWindow.close();
@@ -29,6 +29,10 @@ function createMainWindow() {
       addCitaWindow.close();
       citaWindow.close();
    });
+   ipcMain.on("reload:window", () => {
+      mainWindow.reload();
+   });
+
    mainWindow.on("closed", () => {
       app.quit();
    });
@@ -45,7 +49,7 @@ function createAddCitaWindow() {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -61,7 +65,7 @@ ipcMain.on("form:cita", () => {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -78,7 +82,7 @@ ipcMain.on("form:cita:edit", (e, cita) => {
          nodeIntegration: true,
       },
    });
-   //addCitaWindow.setMenu(null);
+   addCitaWindow.setMenu(null);
    addCitaWindow.loadFile("./src/views/add-cita.html");
    addCitaWindow.on("closed", () => {
       addCitaWindow = null;
@@ -99,7 +103,7 @@ ipcMain.on("show:cita", (e, data) => {
          nodeIntegration: true,
       },
    });
-   //citaWindow.setMenu(null);
+   citaWindow.setMenu(null);
    citaWindow.loadFile("./src/views/cita.html");
    citaWindow.on("closed", () => {
       citaWindow = null;

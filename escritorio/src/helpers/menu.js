@@ -3,7 +3,7 @@ const { Menu } = require("electron");
 module.exports.createMenu = function (addCita) {
    const templateMenu = [
       {
-         label: "File",
+         label: "Agregar",
          submenu: [
             {
                label: "Nueva cita",
