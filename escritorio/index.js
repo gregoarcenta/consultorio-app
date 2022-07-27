@@ -14,8 +14,9 @@ function createMainWindow() {
          nodeIntegration: true,
       },
    });
+   // mainWindow.webContents.openDevTools()
    mainWindow.loadFile("./src/views/index.html");
-   createMenu(createAddCitaWindow);
+   // createMenu(createAddCitaWindow);
    ipcMain.on("create:cita", () => {
       mainWindow.reload();
       addCitaWindow.close();
